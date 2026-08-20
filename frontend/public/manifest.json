@@ -1,0 +1,9 @@
+{
+  "name": "GadgetPulse BD",
+  "short_name": "GadgetPulse",
+  "description": "Authorized Flagship Mobile & Gadget Store in Bangladesh",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb"
+}

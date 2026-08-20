@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: bulletgym-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: bullet_admin
+      POSTGRES_PASSWORD: bullet_secret_password_2026
+      POSTGRES_DB: bulletgym_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bullet_admin -d bulletgym_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. REST API Backend (Express + TypeScript + Prisma)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bulletgym-backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://bullet_admin:bullet_secret_password_2026@postgres:5432/bulletgym_db?schema=public"
+      JWT_SECRET: "bulletgym_super_secret_jwt_key_2026_!#$"
+      JWT_EXPIRES_IN: "7d"
+      CLIENT_URL: "http://localhost:3000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend_uploads:/app/uploads
+
+  # 3. Next.js Frontend Dashboard
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bulletgym-frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  backend_uploads:

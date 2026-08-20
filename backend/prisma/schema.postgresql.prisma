@@ -1,0 +1,158 @@
+// Prisma Schema for Bakalia BulletGym Management System (PostgreSQL Production)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  username     String     @unique
+  email        String     @unique
+  passwordHash String
+  role         String     @default("MEMBER") // ADMIN, TRAINER, RECEPTIONIST, MEMBER
+  fullName     String
+  phone        String?
+  avatarUrl    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+}
+
+model MembershipPlan {
+  id           String     @id @default(uuid())
+  name         String     @unique // Daily, Weekly, Monthly, Quarterly, Yearly, VIP Pro
+  duration     String     // "1 Day", "1 Month", "3 Months", "1 Year"
+  durationDays Int
+  price        Float
+  description  String?
+  isPopular    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  members      Member[]
+  payments     Payment[]
+}
+
+model Member {
+  id                 String          @id @default(uuid())
+  memberId           String          @unique // e.g. BBG-2026-001
+  fullName           String
+  phone              String
+  email              String?
+  gender             String          // Male, Female, Other
+  dob                String?
+  address            String?
+  bloodGroup         String?         // A+, B+, O+, AB+, etc.
+  emergencyContact   String?
+  membershipPlanId   String?
+  membershipPlan     MembershipPlan? @relation(fields: [membershipPlanId], references: [id], onDelete: SetNull)
+  joinDate           DateTime        @default(now())
+  expiryDate         DateTime
+  photo              String?         // Base64 or uploaded URL
+  qrCode             String?         // Base64 or QR string
+  status             String          @default("ACTIVE") // ACTIVE, EXPIRED, PENDING, INACTIVE
+  assignedTrainerId  String?
+  assignedTrainer    Trainer?        @relation(fields: [assignedTrainerId], references: [id], onDelete: SetNull)
+  heightCm           Float?
+  weightKg           Float?
+  notes              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  payments           Payment[]
+  attendance         Attendance[]
+  workoutPlans       WorkoutPlan[]
+}
+
+model Payment {
+  id            String          @id @default(uuid())
+  invoice       String          @unique // e.g. INV-2026-0001
+  memberId      String
+  member        Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  planId        String?
+  plan          MembershipPlan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  amount        Float
+  discount      Float           @default(0)
+  fine          Float           @default(0)
+  totalPaid     Float
+  paymentMethod String          // CASH, CARD, BKASH, NAGAD, BANK
+  transactionId String?         // TrxID for bKash, Nagad, Card pos, Bank Ref
+  senderNumber  String?         // Sender MFS phone number (bKash/Nagad account)
+  status        String          @default("PAID") // PAID, PENDING, PARTIAL
+  paidDate      DateTime        @default(now())
+  dueDate       DateTime?
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Attendance {
+  id          String    @id @default(uuid())
+  memberId    String
+  member      Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  checkIn     DateTime  @default(now())
+  checkOut    DateTime?
+  duration    Int?      // Duration in minutes
+  method      String    @default("MANUAL") // QR_SCAN, FACE_RECOGNITION, MANUAL
+  cameraImage String?   // Captured snapshot url or base64
+  device      String?   @default("Front Desk Terminal")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Trainer {
+  id             String        @id @default(uuid())
+  name           String
+  specialization String        // Bodybuilding, Cardio & HIIT, Crossfit, Weight Loss, Nutrition
+  phone          String
+  email          String        @unique
+  salary         Float
+  status         String        @default("ACTIVE") // ACTIVE, ON_LEAVE, INACTIVE
+  photoUrl       String?
+  bio            String?
+  experienceYrs  Int           @default(3)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  members        Member[]
+  workoutPlans   WorkoutPlan[]
+}
+
+model WorkoutPlan {
+  id          String   @id @default(uuid())
+  trainerId   String?
+  trainer     Trainer? @relation(fields: [trainerId], references: [id], onDelete: SetNull)
+  memberId    String
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  title       String   // e.g. "Hypertrophy Muscle Builder 4-Day Split"
+  exercises   String   // JSON formatted string containing exercise array
+  duration    String   // e.g. "8 Weeks"
+  bmiTarget   Float?
+  notes       String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  username  String?
+  action    String   // e.g. "CREATE_MEMBER", "CHECK_IN", "PAYMENT_COLLECTED"
+  resource  String   // e.g. "Members", "Attendance", "Payments"
+  details   String?  // JSON or text description
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model GymSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  category    String   @default("GENERAL") // GENERAL, NOTIFICATION, BILLING
+  description String?
+  updatedAt   DateTime @updatedAt
+}

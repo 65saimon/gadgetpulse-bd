@@ -1,0 +1,388 @@
+// Prisma Schema for GadgetPulse BD - Mobile & Gadget E-Commerce & Retail ERP System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------
+// 1. AUTHENTICATION & USERS (Staff / Admin Roles)
+// ---------------------------------------------------------
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  username     String        @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         String        @default("ADMIN") // SUPER_ADMIN, ADMIN, INVENTORY_MANAGER, SALES_MANAGER
+  avatarUrl    String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+}
+
+// ---------------------------------------------------------
+// 2. CUSTOMERS (E-Commerce Shoppers)
+// ---------------------------------------------------------
+model Customer {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  fullName     String
+  phone        String
+  avatarUrl    String?
+  division     String?       // Dhaka, Chattogram, Sylhet, etc.
+  district     String?       // Dhaka, Gazipur, Chattogram, etc.
+  upazila      String?       // Gulshan, Dhanmondi, Agrabad, etc.
+  address      String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  orders       Order[]
+  invoices     Invoice[]
+  reviews      Review[]
+  wishlists    Wishlist[]
+  addresses    Address[]
+}
+
+model Address {
+  id          String   @id @default(uuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title       String   @default("Home") // Home, Office, Other
+  receiverName String
+  phone       String
+  division    String
+  district    String
+  upazila     String
+  areaAddress String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------------------------------------------------------
+// 3. CATEGORIES & BRANDS
+// ---------------------------------------------------------
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  iconName    String?
+  parentId    String?
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
+  displayOrder Int      @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  logoUrl     String?
+  description String?
+  website     String?
+  isFeatured  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+// ---------------------------------------------------------
+// 4. PRODUCTS & VARIANTS
+// ---------------------------------------------------------
+model Product {
+  id            String           @id @default(uuid())
+  name          String
+  slug          String           @unique
+  sku           String           @unique
+  brandId       String
+  brand         Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  categoryId    String
+  category      Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  shortDesc     String?
+  description   String?
+  specifications String?         // JSON string formatted technical specs
+  warranty      String?          @default("1 Year Official Warranty")
+  regularPrice  Float
+  discountPrice Float?
+  purchasePrice Float            @default(0)
+  stockQuantity Int              @default(0)
+  minStockLevel Int              @default(5)
+  mainImage     String
+  isPublished   Boolean          @default(true)
+  isFeatured    Boolean          @default(false)
+  isBestSeller  Boolean          @default(false)
+  isNewArrival  Boolean          @default(true)
+  rating        Float            @default(5.0)
+  ratingCount   Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  images        ProductImage[]
+  variants      ProductVariant[]
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlists     Wishlist[]
+  stockHistory  InventoryTransaction[]
+  purchaseItems PurchaseItem[]
+}
+
+model ProductVariant {
+  id            String      @id @default(uuid())
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String      // e.g. "256GB - Natural Titanium"
+  color         String?     // e.g. "Natural Titanium"
+  colorCode     String?     // e.g. "#9B9488"
+  storage       String?     // e.g. "256GB"
+  ram           String?     // e.g. "8GB"
+  sku           String      @unique
+  purchasePrice Float       @default(0)
+  regularPrice  Float
+  discountPrice Float?
+  stockQuantity Int         @default(0)
+  imageUrl      String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  orderItems    OrderItem[]
+  stockHistory  InventoryTransaction[]
+  purchaseItems PurchaseItem[]
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  altText   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------
+// 5. REVIEWS & WISHLISTS
+// ---------------------------------------------------------
+model Review {
+  id         String   @id @default(uuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rating     Int      @default(5) // 1 to 5
+  title      String?
+  comment    String
+  isVerified Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Wishlist {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([customerId, productId])
+}
+
+// ---------------------------------------------------------
+// 6. ORDERS & ORDER ITEMS
+// ---------------------------------------------------------
+model Order {
+  id             String      @id @default(uuid())
+  orderNumber    String      @unique // e.g. ORD-20260821-0001
+  customerId     String?
+  customer       Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  // Shipping details snapshot
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  division       String
+  district       String
+  upazila        String
+  shippingAddress String
+  
+  // Financials
+  subtotal       Float
+  discountAmount Float       @default(0)
+  couponCode     String?
+  deliveryFee    Float       @default(60) // BDT 60 inside Dhaka, 120 outside
+  vatAmount      Float       @default(0)
+  grandTotal     Float
+
+  // Payment
+  paymentMethod  String      // CASH_ON_DELIVERY, BKASH, NAGAD, BANK_TRANSFER
+  paymentStatus  String      @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  transactionId  String?     // TrxID from bKash or Nagad
+  senderPhone    String?     // bKash/Nagad sender phone number
+  paidAt         DateTime?
+
+  // Status & Lifecycle
+  orderStatus    String      @default("PENDING") // PENDING, CONFIRMED, PROCESSING, PACKED, SHIPPED, DELIVERED, CANCELLED, RETURNED
+  adminNotes     String?
+  estimatedDelivery String?
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  items          OrderItem[]
+  invoice        Invoice?
+  stockHistory   InventoryTransaction[]
+}
+
+model OrderItem {
+  id             String          @id @default(uuid())
+  orderId        String
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId      String?
+  variant        ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  
+  productName    String
+  variantName    String?
+  sku            String
+  unitPrice      Float
+  purchaseCost   Float           @default(0) // Snapshot for accurate profit calculation
+  quantity       Int
+  totalPrice     Float
+  createdAt      DateTime        @default(now())
+}
+
+// ---------------------------------------------------------
+// 7. INVOICES
+// ---------------------------------------------------------
+model Invoice {
+  id            String    @id @default(uuid())
+  invoiceNumber String    @unique // e.g. INV-2026-000001
+  orderId       String    @unique
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  
+  issueDate     DateTime  @default(now())
+  dueDate       DateTime?
+  customerName  String
+  customerPhone String
+  customerAddress String
+  
+  subtotal      Float
+  discount      Float     @default(0)
+  deliveryFee   Float     @default(0)
+  vat           Float     @default(0)
+  grandTotal    Float
+  paymentMethod String
+  paymentStatus String
+  
+  notes         String?
+  terms         String?   @default("Goods once sold with official warranty can be serviced through authorized service centers in Bangladesh. Please preserve this tax invoice for warranty claims.")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------
+// 8. INVENTORY MANAGEMENT & STOCK TRANSACTIONS
+// ---------------------------------------------------------
+model InventoryTransaction {
+  id          String          @id @default(uuid())
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  orderId     String?
+  order       Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  
+  type        String          // STOCK_IN_PURCHASE, ORDER_SOLD, ORDER_CANCELLED_RESTORE, RETURN_RESTORE, DAMAGE_WRITEOFF, MANUAL_ADJUSTMENT
+  prevQty     Int
+  changeQty   Int             // positive or negative
+  newQty      Int
+  unitCost    Float?
+  reason      String?
+  actor       String?         @default("System") // Admin Name or System
+  createdAt   DateTime        @default(now())
+}
+
+// ---------------------------------------------------------
+// 9. SUPPLIERS & PURCHASES
+// ---------------------------------------------------------
+model Supplier {
+  id          String     @id @default(uuid())
+  name        String
+  company     String
+  phone       String
+  email       String?
+  address     String?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  purchases   Purchase[]
+}
+
+model Purchase {
+  id             String         @id @default(uuid())
+  purchaseNumber String         @unique // e.g. PO-2026-0001
+  supplierId     String
+  supplier       Supplier       @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  referenceNo    String?        // Vendor invoice number
+  purchaseDate   DateTime       @default(now())
+  totalAmount    Float
+  notes          String?
+  status         String         @default("RECEIVED") // PENDING, RECEIVED, CANCELLED
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  items          PurchaseItem[]
+}
+
+model PurchaseItem {
+  id            String          @id @default(uuid())
+  purchaseId    String
+  purchase      Purchase        @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  quantity      Int
+  unitCost      Float
+  totalCost     Float
+  createdAt     DateTime        @default(now())
+}
+
+// ---------------------------------------------------------
+// 10. SYSTEM AUDIT LOGS & SETTINGS
+// ---------------------------------------------------------
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName  String?
+  action    String   // e.g. "PRODUCT_CREATED", "ORDER_STATUS_UPDATED", "STOCK_ADJUSTED", "LOGIN"
+  entity    String   // "Product", "Order", "Inventory", "Invoice", "Auth"
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model StoreSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  category    String   @default("GENERAL") // GENERAL, PAYMENT, NOTIFICATION, INVOICE
+  description String?
+  updatedAt   DateTime @updatedAt
+}

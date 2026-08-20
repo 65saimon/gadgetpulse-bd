@@ -5,6 +5,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import { CompareProvider } from '../context/CompareContext';
+import { MobileBottomNav } from '../components/storefront/MobileBottomNav';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,12 +28,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900 antialiased overflow-x-hidden w-full max-w-[100vw]`}>
+      <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900 antialiased overflow-x-hidden w-full max-w-[100vw] pb-16 lg:pb-0`}>
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
               <CompareProvider>
                 {children}
+                <MobileBottomNav />
               </CompareProvider>
             </WishlistProvider>
           </CartProvider>

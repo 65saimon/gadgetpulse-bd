@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Smartphone, Lock, Mail, ShieldAlert, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Smartphone, Lock, Mail, ShieldAlert, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiRequest } from '../../../lib/api';
 
@@ -38,11 +38,6 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickLogin = (roleEmail: string, pass: string) => {
-    setEmail(roleEmail);
-    setPassword(pass);
   };
 
   return (
@@ -118,48 +113,6 @@ export default function AdminLoginPage() {
             {loading ? 'Authenticating Admin Session...' : 'Sign In to ERP Dashboard'}
           </button>
         </form>
-
-        {/* Quick Role Fill Buttons */}
-        <div className="pt-4 border-t border-slate-800 space-y-2">
-          <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block text-center">
-            One-Click Role Demonstration Credentials:
-          </span>
-
-          <div className="grid grid-cols-1 gap-2 text-xs font-bold">
-            <button
-              onClick={() => handleQuickLogin('admin@gadgetpulse.bd', 'admin123')}
-              className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left flex items-center justify-between transition"
-            >
-              <div>
-                <p className="text-white">Super Admin (Full Access)</p>
-                <p className="text-[10px] text-blue-400 font-mono">admin@gadgetpulse.bd / admin123</p>
-              </div>
-              <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">Select</span>
-            </button>
-
-            <button
-              onClick={() => handleQuickLogin('sales@gadgetpulse.bd', 'staff123')}
-              className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left flex items-center justify-between transition"
-            >
-              <div>
-                <p className="text-white">Sales Manager (Orders & CRM)</p>
-                <p className="text-[10px] text-emerald-400 font-mono">sales@gadgetpulse.bd / staff123</p>
-              </div>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">Select</span>
-            </button>
-
-            <button
-              onClick={() => handleQuickLogin('inventory@gadgetpulse.bd', 'staff123')}
-              className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left flex items-center justify-between transition"
-            >
-              <div>
-                <p className="text-white">Inventory Manager (Stock & PO)</p>
-                <p className="text-[10px] text-amber-400 font-mono">inventory@gadgetpulse.bd / staff123</p>
-              </div>
-              <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">Select</span>
-            </button>
-          </div>
-        </div>
       </div>
 
       <div className="text-center text-xs text-slate-600">

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Smartphone, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Smartphone, Lock, Mail, AlertCircle } from 'lucide-react';
 import { AnnouncementBar } from '../../components/storefront/AnnouncementBar';
 import { Navbar } from '../../components/storefront/Navbar';
 import { Footer } from '../../components/storefront/Footer';
@@ -41,11 +41,6 @@ export default function CustomerLoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoFill = () => {
-    setEmail('rafid.mahmud@gmail.com');
-    setPassword('customer123');
   };
 
   return (
@@ -113,17 +108,7 @@ export default function CustomerLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Login Button */}
-          <div className="pt-2 border-t border-slate-100">
-            <button
-              onClick={handleDemoFill}
-              className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
-            >
-              Quick Fill Demo Customer (`rafid.mahmud@gmail.com`)
-            </button>
-          </div>
-
-          <div className="text-center text-xs text-slate-500">
+          <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
             Don't have an account?{' '}
             <Link href="/register" className="font-bold text-blue-600 hover:underline">
               Create Account

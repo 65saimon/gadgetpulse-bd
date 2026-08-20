@@ -211,8 +211,11 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-5 space-y-4">
             <div className="relative pt-[90%] rounded-2xl bg-slate-50 border border-slate-100 p-6 overflow-hidden flex items-center justify-center">
               <img
-                src={selectedImage || product.mainImage}
+                src={selectedImage || product.mainImage || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=80'}
                 alt={product.name}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=80';
+                }}
                 className="absolute inset-0 w-full h-full object-contain p-6 hover:scale-110 transition-transform duration-500"
               />
             </div>
@@ -228,7 +231,14 @@ export default function ProductDetailPage() {
                       selectedImage === imgUrl ? 'border-blue-600 shadow-md' : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <img src={imgUrl} alt="thumbnail" className="w-full h-full object-contain" />
+                    <img
+                      src={imgUrl}
+                      alt="thumbnail"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200&auto=format&fit=crop&q=80';
+                      }}
+                      className="w-full h-full object-contain"
+                    />
                   </button>
                 ))}
               </div>

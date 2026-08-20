@@ -346,13 +346,13 @@ function ProductsContent() {
 
             {/* Product Grid / List */}
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-80 bg-slate-200 animate-pulse rounded-2xl" />
+                  <div key={i} className="h-64 sm:h-80 bg-slate-200 animate-pulse rounded-2xl" />
                 ))}
               </div>
             ) : products.length > 0 ? (
-              <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6' : 'space-y-4'}>
+              <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6' : 'space-y-4'}>
                 {products.map((prod) => (
                   <ProductCard key={prod.id} product={prod} />
                 ))}

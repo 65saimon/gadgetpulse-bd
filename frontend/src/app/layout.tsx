@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '../context/AuthContext';
@@ -7,6 +7,12 @@ import { WishlistProvider } from '../context/WishlistContext';
 import { CompareProvider } from '../context/CompareContext';
 
 const inter = Inter({ subsets: ['latin'] });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   title: 'GadgetPulse Bangladesh | Premier Flagship Smartphones & Genuine Gadgets',
@@ -21,7 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={inter.className}>
+      <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900 antialiased overflow-x-hidden w-full max-w-[100vw]`}>
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>

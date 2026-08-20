@@ -29,52 +29,52 @@ export const FlashDeals: React.FC<FlashDealsProps> = ({ products }) => {
   const flashItems = products.slice(0, 4);
 
   return (
-    <section className="bg-gradient-to-br from-rose-600 via-rose-700 to-pink-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-rose-600/10">
+    <section className="bg-gradient-to-br from-rose-600 via-rose-700 to-pink-800 rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-xl shadow-rose-600/10 w-full">
       {/* Header with countdown */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-rose-500/50">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-            <Zap className="w-6 h-6 text-amber-300 fill-current animate-bounce" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-rose-500/50">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+            <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-amber-300 fill-current animate-bounce" />
           </div>
           <div>
-            <h2 className="text-2xl font-black tracking-tight">Flash Super Deals</h2>
-            <p className="text-xs text-rose-200">Limited time discounts on genuine gadgets</p>
+            <h2 className="text-lg sm:text-2xl font-black tracking-tight">Flash Super Deals</h2>
+            <p className="text-[11px] sm:text-xs text-rose-200">Limited time discounts on genuine gadgets</p>
           </div>
         </div>
 
         {/* Countdown badges */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-rose-200 mr-1 flex items-center gap-1">
-            <Timer className="w-4 h-4" /> Ends in:
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-rose-200 mr-1 flex items-center gap-1">
+            <Timer className="w-3.5 h-3.5" /> Ends:
           </span>
-          <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-xl text-sm font-black border border-white/20">
+          <div className="bg-white/20 backdrop-blur-md px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black border border-white/20">
             {String(timeLeft.hours).padStart(2, '0')}h
           </div>
           <span className="font-bold">:</span>
-          <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-xl text-sm font-black border border-white/20">
+          <div className="bg-white/20 backdrop-blur-md px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black border border-white/20">
             {String(timeLeft.minutes).padStart(2, '0')}m
           </div>
           <span className="font-bold">:</span>
-          <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-xl text-sm font-black border border-white/20 text-amber-300">
+          <div className="bg-white/20 backdrop-blur-md px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black border border-white/20 text-amber-300">
             {String(timeLeft.seconds).padStart(2, '0')}s
           </div>
         </div>
       </div>
 
-      {/* Grid of Flash Products */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-6">
+      {/* Grid of Flash Products - 2 Columns on Mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 pt-4 sm:pt-6">
         {flashItems.map((prod) => (
           <ProductCard key={prod.id} product={prod} />
         ))}
       </div>
 
-      <div className="pt-6 text-center">
+      <div className="pt-4 sm:pt-6 text-center">
         <Link
           href="/products?sortBy=discount"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-rose-700 hover:bg-rose-50 text-xs font-extrabold shadow-md transition"
+          className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-white text-rose-700 hover:bg-rose-50 text-[11px] sm:text-xs font-extrabold shadow-md transition"
         >
-          <span>View All Flash Discount Products</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span>View All Flash Discount Deals</span>
+          <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
         </Link>
       </div>
     </section>
